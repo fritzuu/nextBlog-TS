@@ -1,19 +1,23 @@
 "use client";
 
-import { useContext, useState } from "react";
-import Button from "../../components/button";
-import { firebaseConfig, formControls } from "@/utils";
-import { initializeApp } from "firebase/app";
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import Button from "@/components/button";
 import Spinner from "@/components/spinner";
 import { GlobalContext } from "@/context";
+import { firebaseConfig, formControls, initialBlogFormData } from "@/utils";
+import { BlogFormData } from "@/utils/types";
+import { initializeApp } from "firebase/app";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import React, { useContext, useState } from "react";
 
 const app = initializeApp(firebaseConfig);
-const storage = getStorage(
-  app,
-  "gs://nextjs-blog-typescript-2-4f081.appspot.com"
-);
-
+const stroage = getStorage(app, "gs://nextjs-blog-typescript-2-4f081.appspot.com");
 
 function createUniqueFileName(fileName: string) {
   const timeStamp = Date.now();
@@ -24,9 +28,9 @@ function createUniqueFileName(fileName: string) {
 
 async function handleImageSaveToFireBase(file: any) {
   const extractUniqueFileName = createUniqueFileName(file?.name);
-  const stroageRef = ref(storage, `blog/${extractUniqueFileName}`);
+  const stroageRef = ref(stroage, `blog/${extractUniqueFileName}`);
   const uploadImg = uploadBytesResumable(stroageRef, file);
-  
+
   return new Promise((resolve, reject) => {
     uploadImg.on(
       "state_changed",
@@ -41,17 +45,20 @@ async function handleImageSaveToFireBase(file: any) {
   });
 }
 
-
 export default function Create() {
-  const [imageLoading, setImageLoading] = useState<boolean>(false);
   const { formData, setFormData } = useContext(GlobalContext);
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  console.log(session, "session");
 
   async function handleBlogImageChange(
     event: React.ChangeEvent<HTMLInputElement>
   ) {
     if (!event.target.files) return;
     setImageLoading(true);
-    const saveImageToFirebase : any = await handleImageSaveToFireBase(
+    const saveImageToFirebase: any = await handleImageSaveToFireBase(
       event.target.files[0]
     );
 
@@ -65,9 +72,35 @@ export default function Create() {
     }
   }
 
-  console.log(formData, 'formData')
+  async function handleSaveBlogPost() {
+    console.log(formData);
 
-  return ( 
+    const res = await fetch("/api/blog-post/add-post", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...formData,
+        userid: session?.user?.name,
+        userimage: session?.user?.image,
+        comments: [],
+      }),
+    });
+
+    const data = await res.json();
+
+    console.log(data, "data123");
+
+    if (data && data.success) {
+      setFormData(initialBlogFormData)
+      router.push("/blogs");
+    }
+  }
+
+  console.log(formData, "formData");
+
+  return (
     <section className="overflow-hidden py-16 md:py-20 lg:py-28">
       <div className="container">
         <div className="-mx-4 flex flex-wrap">
@@ -98,51 +131,81 @@ export default function Create() {
                       </div>
                     ) : null}
                   </div>
-                  </div>
 
-                <div className="-mx-4 flex flex-wrap">
-                  {formControls.map((control) => (
-                    <div className="w-full px-4">
-                      <label className="mb-3 block text-sm font-medium text-dark dark:text-white">
-                        {control.label}
-                      </label>
-                      {control.component === "input" ? (
-                        <input
-                          type={control.type}
-                          name={control.id}
-                          placeholder={control.placeholder}
-                          className="w-full mb-8 rounded-md border border-transparent py-3 px-6 text-base text-body-color placeholder-body-color shadow-one outline-none focus:border-primary focus-visible:shadow-none dark:bg-[#242B51] dark:shadow-signUp"
-                        />
-                      ) : control.component === "textarea" ? (
-                        <textarea
-                          placeholder={control.placeholder}
-                          rows={5}
-                          name={control.id}
-                          className="w-full resize-none rounded-md border border-transparent py-3 px-6 text-base text-body-color placeholder-body-color shadow-one outline-none focus:border-primary focus-visible:shadow-none dark:bg-[#242B51] dark:shadow-signUp"
-                        />
-                      ) : control.component === "select" ? (
-                        <select
-                          name={control.id}
-                          placeholder={control.placeholder}
-                          className="w-full mb-8 rounded-md border border-transparent py-3 px-6 text-base text-body-color placeholder-body-color shadow-one outline-none focus:border-primary focus-visible:shadow-none dark:bg-[#242B51] dark:shadow-signUp"
-                        >
-                          <option value={""} id="">
-                            Select
-                          </option>
-                          {control.options.map((optionItem) => (
-                            <option
-                              id={optionItem.value}
-                              value={optionItem.value}
-                            >
-                              {optionItem.label}
+                  <div className="-mx-4 flex flex-wrap">
+                    {formControls.map((control) => (
+                      <div className="w-full px-4">
+                        <label className="mb-3 block text-sm font-medium text-dark dark:text-white">
+                          {control.label}
+                        </label>
+                        {control.component === "input" ? (
+                          <input
+                            type={control.type}
+                            name={control.id}
+                            placeholder={control.placeholder}
+                            onChange={(
+                              event: React.ChangeEvent<HTMLInputElement>
+                            ) => {
+                              setFormData({
+                                ...formData,
+                                [control.id]: event.target.value,
+                              });
+                            }}
+                            value={formData[control.id as keyof BlogFormData]}
+                            className="w-full mb-8 rounded-md border border-transparent py-3 px-6 text-base text-body-color placeholder-body-color shadow-one outline-none focus:border-primary focus-visible:shadow-none dark:bg-[#242B51] dark:shadow-signUp"
+                          />
+                        ) : control.component === "textarea" ? (
+                          <textarea
+                            placeholder={control.placeholder}
+                            rows={5}
+                            name={control.id}
+                            onChange={(
+                              event: React.ChangeEvent<HTMLTextAreaElement>
+                            ) => {
+                              setFormData({
+                                ...formData,
+                                [control.id]: event.target.value,
+                              });
+                            }}
+                            value={formData[control.id as keyof BlogFormData]}
+                            className="w-full resize-none rounded-md border border-transparent py-3 px-6 text-base text-body-color placeholder-body-color shadow-one outline-none focus:border-primary focus-visible:shadow-none dark:bg-[#242B51] dark:shadow-signUp"
+                          />
+                        ) : control.component === "select" ? (
+                          <select
+                            name={control.id}
+                            placeholder={control.placeholder}
+                            onChange={(
+                              event: React.ChangeEvent<HTMLSelectElement>
+                            ) => {
+                              setFormData({
+                                ...formData,
+                                [control.id]: event.target.value,
+                              });
+                            }}
+                            value={formData[control.id as keyof BlogFormData]}
+                            className="w-full mb-8 rounded-md border border-transparent py-3 px-6 text-base text-body-color placeholder-body-color shadow-one outline-none focus:border-primary focus-visible:shadow-none dark:bg-[#242B51] dark:shadow-signUp"
+                          >
+                            <option value={""} id="">
+                              Select
                             </option>
-                          ))}
-                        </select>
-                      ) : null}
+                            {control.options.map((optionItem) => (
+                              <option
+                                id={optionItem.value}
+                                value={optionItem.value}
+                              >
+                                {optionItem.label}
+                              </option>
+                            ))}
+                          </select>
+                        ) : null}
+                      </div>
+                    ))}
+                    <div className="w-full px-4">
+                      <Button
+                        text="Create New Blog"
+                        onClick={handleSaveBlogPost}
+                      />
                     </div>
-                  ))}
-                  <div className="w-full px-4">
-                    <Button text="Create New Blog" onClick={() => {}} />
                   </div>
                 </div>
               </div>

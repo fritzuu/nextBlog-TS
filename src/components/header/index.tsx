@@ -40,7 +40,7 @@ export default function Header() {
         className={`top-0 left-0 z-40 flex w-full items-center bg-transparent
         ${
           sticky
-            ? "!fixed !z-[9999] !bg-white !bg-opacity-80 shadow-sticky backdrop:blur-sm !transition dark:!bg-primary dark:!bg-opacity-20"
+            ? "!fixed !z-[9999] !bg-white !bg-opacity-100 shadow-sticky backdrop:blur-sm !transition dark:!bg-primary dark:!bg-opacity-100"
             : "absolute"
         }
         `}
@@ -54,7 +54,7 @@ export default function Header() {
                     ${sticky ? "py-5 lg:py-2" : "py-8"}
                     `}
               >
-                NextBlog
+                RJR|BLOG
               </Link>
             </div>
             <div className="flex w-full items-center justify-between px-4">
