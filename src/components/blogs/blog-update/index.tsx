@@ -13,8 +13,8 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import React, { useContext, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import React, { useContext, useEffect, useState } from "react";
 
 const app = initializeApp(firebaseConfig);
 const stroage = getStorage(app, "gs://nextjs-blog-typescript-2-4f081.appspot.com");
@@ -45,13 +45,12 @@ async function handleImageSaveToFireBase(file: any) {
   });
 }
 
-export default function Create() {
+export function BlogUpdate({ formDataObj }:  { formDataObj: BlogFormData }) {
   const { formData, setFormData } = useContext(GlobalContext);
   const [imageLoading, setImageLoading] = useState<boolean>(false);
   const { data: session } = useSession();
   const router = useRouter();
-
-  console.log(session, "session");
+  const params = useParams();
 
   async function handleBlogImageChange(
     event: React.ChangeEvent<HTMLInputElement>
@@ -71,26 +70,9 @@ export default function Create() {
       });
     }
   }
-  async function extractBlogDetails(id: string) {
-    const res = await fetch(
-      `${process.env.URL}/api/blog-post/blog-details?blogID=${id}`,
-      {
-        method: "GET",
-        next : {
-          revalidate : 0
-        }
-      }
-    );
-  
-    const data = await res.json();
-  
-    if (data.success) return data.data;
-  }
 
   async function handleSaveBlogPost() {
-    console.log(formData);
-
-    const res = await fetch("/api/blog-post/add-post", {
+    const res = await fetch(`/api/blog-post/update-post?blogID=${params.id}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -113,7 +95,9 @@ export default function Create() {
     }
   }
 
-  console.log(formData, "formData");
+  useEffect(() => {
+    setFormData(formDataObj);
+  }, [])
 
   return (
     <section className="overflow-hidden py-16 md:py-20 lg:py-28">
@@ -122,7 +106,7 @@ export default function Create() {
           <div className="w-full px-4">
             <div className="mb-12 rounded-md bg-primary/[3%] py-10 dark:bg-dark sm:p-[55px] lg:mb-5 lg:px-8 xl:p-[55px] px-8">
               <h2 className="mb-3 text-2xl font-bold text-black dark:text-white sm:text-3xl lg:text-2xl xl:text-3xl">
-                Create Your Own Blog Post
+                Update Blog
               </h2>
               <div>
                 <div className="flex flex-col gap-3">
@@ -217,7 +201,7 @@ export default function Create() {
                     ))}
                     <div className="w-full px-4">
                       <Button
-                        text="Create New Blog"
+                        text="Update Blog"
                         onClick={handleSaveBlogPost}
                       />
                     </div>

@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaTrash } from "react-icons/fa";
+import { FaPencilAlt } from "react-icons/fa";
 
 export default function SingleBlog({
   blogItem,
@@ -22,7 +23,10 @@ export default function SingleBlog({
   return (
     <div>
       <div className="relative overflow-hidden rounded-md bg-white shadow-one dark:bg-dark">
-        <Link className="relative block h-[250px] w-full" href={`/category/${category}`}>
+        <Link
+          className="relative block h-[250px] w-full"
+          href={`/category/${category}`}
+        >
           <span className="absolute top-6 right-6 z-20 inline-flex items-center justify-center rounded-full bg-primary py-2 px-4 text-sm font-semibold capitalize text-white">
             {category}
           </span>
@@ -56,11 +60,18 @@ export default function SingleBlog({
                 {userid.split("_")[0].toUpperCase()}
               </p>
             </div>
-            <div>
+            <div className="ml-2 mt-3">
+              {session !== null && session?.user?.name === userid ? (
+                <a href={`/update/${id}`}>
+                  <FaPencilAlt size={20} className="cursor-pointer" />
+                </a>
+              ) : null}
+            </div>
+            <div className="ml-2 mt-3"> 
               {session !== null && session?.user?.name === userid ? (
                 <FaTrash
                   onClick={() => handleDelete(id)}
-                  size={30}
+                  size={20}
                   className="cursor-pointer"
                 />
               ) : null}
