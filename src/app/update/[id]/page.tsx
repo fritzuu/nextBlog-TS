@@ -2,7 +2,7 @@ import { BlogUpdate } from "@/components/blogs/blog-update";
 
 async function extractBlogDetails(id: string) {
   const res = await fetch(
-    `${process.env.URL}/api/blog-post/blog-details?blogID=${id}`,
+    `${process.env.URL}/api/blog-post/blog-details?edit&blogID=${id}`,
     {
       method: "GET",
       next : {
@@ -12,7 +12,6 @@ async function extractBlogDetails(id: string) {
   );
 
   const data = await res.json();
-  console.log(data);
 
   if (data.success) return data.data;
 }

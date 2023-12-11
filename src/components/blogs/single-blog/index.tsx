@@ -30,8 +30,10 @@ export default function SingleBlog({
           <span className="absolute top-6 right-6 z-20 inline-flex items-center justify-center rounded-full bg-primary py-2 px-4 text-sm font-semibold capitalize text-white">
             {category}
           </span>
-          <Image src={image} alt="Blog Post" fill />
         </Link>
+        <Link href={`/blogs/${id}`}>
+          <Image src={image} alt="Blog Post" fill />
+         </Link>
       </div>
       <div className="p-6 sm:p-8 md:py-8 md:px-6 lg:p-8 xl:py-8 xl:px-5 2xl:p-8">
         <h3>
@@ -54,7 +56,7 @@ export default function SingleBlog({
             </div>
             <div className="flex flex-col">
               <p className="mb-1 text-sm font-medium text-dark dark:text-white">
-                By
+                Posted by :
               </p>
               <p className="mb-1 text-sm font-medium text-dark dark:text-white">
                 {userid.split("_")[0].toUpperCase()}

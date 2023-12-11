@@ -23,6 +23,7 @@ export interface BlogFormData {
     description : string;
     image : string;
     category : string;
+    userid: string;
 }
 
 export interface Blog{

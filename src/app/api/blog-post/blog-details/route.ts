@@ -1,10 +1,12 @@
 import prisma from "@/database";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const blogID = url.searchParams.get("blogID");
+    const isEdit = url.searchParams.has("edit");
 
     const blogDetails = await prisma.post.findUnique({
       where: {
@@ -13,6 +15,8 @@ export async function GET(req: NextRequest) {
     });
 
     if (blogDetails) {
+
+
       return NextResponse.json({
         success: true,
         data: blogDetails,

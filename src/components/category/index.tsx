@@ -7,8 +7,12 @@ import Image from "next/image";
 import { categories } from "@/utils";
 import Link from "next/link";
 
-export default function CategoryList({ list }: { list: Blog[] }) {
+export default function CategoryList({ list }: 
+  { 
+    
+    list: Blog[] }) {
   console.log(list, "list");
+
 
   const router = useRouter();
 
@@ -95,7 +99,7 @@ export default function CategoryList({ list }: { list: Blog[] }) {
                           <div className="w-full">
                             <h5>
                               <Link
-                                href={"/"}
+                              href={`/blogs/${item.id}`}
                                 className="mb-[8px] block text-base font-medium text-black dark:text-white hover:text-primary dark:hover:text-primary"
                               >
                                 {item.title}

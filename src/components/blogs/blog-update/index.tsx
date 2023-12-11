@@ -12,7 +12,7 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
-import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 
@@ -51,6 +51,10 @@ export function BlogUpdate({ formDataObj }:  { formDataObj: BlogFormData }) {
   const { data: session } = useSession();
   const router = useRouter();
   const params = useParams();
+
+  if(formDataObj.userid !== session?.user?.name){
+    router.push('/blogs');
+  }
 
   async function handleBlogImageChange(
     event: React.ChangeEvent<HTMLInputElement>

@@ -7,14 +7,14 @@ export const menuItems: MenuItem[] = [
     path: "/",
   },
   {
-    id: "category",
-    label: "Category",
-    path: "/category/application",
-  },
-  {
     id: "blogs",
     label: "Blogs",
     path: "/blogs",
+  },
+  {
+    id: "category",
+    label: "Category",
+    path: "/category/application",
   },
   {
     id: "search",

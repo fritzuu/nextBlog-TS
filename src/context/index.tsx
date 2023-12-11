@@ -37,7 +37,7 @@ const initialState = {
 
 export const GlobalContext = createContext<ContextType>(initialState);
 
-export default function GlobalState({ children }: { children: ReactNode }) {
+export default function GlobalState({ children,  }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(initialBlogFormData);
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,6 +49,13 @@ export default function GlobalState({ children }: { children: ReactNode }) {
   if (session === undefined) return <Spinner />;
 
   if (session === null && pathname === "/create") router.push("/");
+
+  if (session === undefined) return <Spinner />;
+
+if (session === null && pathname.startsWith("/update/")) {
+  router.push("/");
+  return <Spinner />;
+}
 
   return (
     <GlobalContext.Provider
